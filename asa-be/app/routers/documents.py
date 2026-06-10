@@ -13,9 +13,9 @@ from typing import List, Optional
 import aiofiles
 from fastapi import (
     APIRouter, Depends, File, Form, HTTPException,
-    Query, UploadFile, status,
+    Query, Request, UploadFile, status,
 )
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -89,7 +89,7 @@ async def upload_document(
             detail=f"File too large. Maximum size is {MAX_UPLOAD_MB} MB",
         )
 
-    # Persist to disk
+    # Persist to disk (local dev) and store in DB (production)
     safe_filename = f"{uuid.uuid4()}{ext}"
     file_path = UPLOAD_DIR / safe_filename
 
@@ -113,6 +113,7 @@ async def upload_document(
         filename=filename,
         file_path=str(file_path),
         file_size=len(file_bytes),
+        file_data=file_bytes,
         mime_type=mime,
         page_count=page_count,
         extracted_text=extracted_text,
@@ -189,24 +190,35 @@ async def view_document(
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid token")
     
-    file_path = Path(doc.file_path)
-    if not file_path.exists():
-        raise HTTPException(status_code=404, detail="File content not found on server")
-        
-    # Ensure correct media type
+    file_path = Path(doc.file_path) if doc.file_path else None
+    
+    # Determine media type
     media_type = doc.mime_type
     if not media_type or media_type == "application/octet-stream":
-        if file_path.suffix.lower() == ".pdf":
+        suffix = Path(doc.filename).suffix.lower() if doc.filename else ""
+        if suffix == ".pdf":
             media_type = "application/pdf"
-        elif file_path.suffix.lower() == ".txt":
+        elif suffix == ".txt":
             media_type = "text/plain"
 
-    return FileResponse(
-        path=file_path,
-        media_type=media_type,
-        filename=doc.filename,
-        content_disposition_type="inline"
-    )
+    # Serve from disk if available, otherwise from DB
+    if file_path and file_path.exists():
+        return FileResponse(
+            path=file_path,
+            media_type=media_type,
+            filename=doc.filename,
+            content_disposition_type="inline"
+        )
+    elif doc.file_data:
+        return Response(
+            content=doc.file_data,
+            media_type=media_type,
+            headers={
+                "Content-Disposition": f'inline; filename="{doc.filename}"',
+            }
+        )
+    else:
+        raise HTTPException(status_code=404, detail="File content not found")
 
 
 @router.get("/{document_id}", response_model=DocumentOut)
@@ -269,13 +281,14 @@ async def delete_document(
         raise HTTPException(status_code=404, detail="Document not found")
     _check_owner(doc, current_user)
 
-    # Remove file from disk
-    file_path = Path(doc.file_path)
-    if file_path.exists():
-        try:
-            file_path.unlink()
-        except OSError as exc:
-            logger.warning("Could not delete file '%s': %s", file_path, exc)
+    # Remove file from disk if it exists
+    if doc.file_path:
+        file_path = Path(doc.file_path)
+        if file_path.exists():
+            try:
+                file_path.unlink()
+            except OSError as exc:
+                logger.warning("Could not delete file '%s': %s", file_path, exc)
 
     await db.delete(doc)
     await db.flush()

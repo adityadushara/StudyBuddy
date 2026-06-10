@@ -8,7 +8,7 @@ from typing import Optional, List
 
 from sqlalchemy import (
     Boolean, DateTime, Float,
-    ForeignKey, Integer, String, Text, Enum as SAEnum, BigInteger,
+    ForeignKey, Integer, String, Text, Enum as SAEnum, BigInteger, LargeBinary,
 )
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -57,8 +57,9 @@ class Document(Base):
     title: Mapped[str] = mapped_column(String(300), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     filename: Mapped[str] = mapped_column(String(300), nullable=False)
-    file_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    file_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     file_size: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    file_data: Mapped[Optional[bytes]] = mapped_column(LargeBinary, nullable=True)
     mime_type: Mapped[str] = mapped_column(String(100), nullable=False, default="application/pdf")
     page_count: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     extracted_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
