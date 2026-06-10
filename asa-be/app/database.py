@@ -62,6 +62,9 @@ async def create_tables() -> None:
     """Create all tables defined in models."""
     async with engine.begin() as conn:
         from app import models  # noqa: F401 – ensures models are registered
+        # Drop and recreate to ensure schema matches models
+        # Remove this after initial deployment is stable
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database tables created/verified.")
 
