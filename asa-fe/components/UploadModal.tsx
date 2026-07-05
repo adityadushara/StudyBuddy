@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { useDropzone } from 'react-dropzone'
 import { documentsApi } from '@/lib/api'
 import { useToast } from '@/components/ui/use-toast'
@@ -24,12 +24,12 @@ export default function UploadModal({ open, onOpenChange, onSuccess }: UploadMod
         const failed = results.filter(r => r.status === 'rejected').length
         
         if (succeeded > 0) {
-            toast({ title: `${succeeded} file${succeeded > 1 ? 's' : ''} uploaded!` })
+            toast({ title: `${succeeded} file${succeeded > 1 ? 's' : ''} uploaded successfully!` })
             onSuccess()
             onOpenChange(false)
         }
         if (failed > 0) {
-            toast({ title: `${failed} file${failed > 1 ? 's' : ''} failed`, variant: 'destructive' })
+            toast({ title: `${failed} file${failed > 1 ? 's' : ''} failed to upload`, variant: 'destructive' })
         }
         setUploading(false)
     }, [onSuccess, onOpenChange, toast])
@@ -40,24 +40,27 @@ export default function UploadModal({ open, onOpenChange, onSuccess }: UploadMod
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md bg-white border-slate-200 rounded-3xl p-6 shadow-2xl">
                 <DialogHeader>
-                    <DialogTitle>Upload Materials</DialogTitle>
+                    <DialogTitle className="text-xl font-black text-slate-900">Upload Study Materials</DialogTitle>
+                    <DialogDescription className="text-xs text-slate-500 font-medium mt-1">
+                        Upload your PDF textbook, notes, or TXT documents to generate AI study materials.
+                    </DialogDescription>
                 </DialogHeader>
                 <div
                     {...getRootProps()}
                     className={cn(
-                        "mt-4 relative group rounded-xl border-2 border-dashed transition-all cursor-pointer overflow-hidden pb-8",
+                        "mt-4 relative group rounded-2xl border-2 border-dashed transition-all cursor-pointer overflow-hidden p-8 text-center",
                         isDragActive
-                            ? "border-primary bg-primary/5 shadow-inner"
-                            : "border-white/10 hover:border-white/30 hover:bg-white/5"
+                            ? "border-indigo-500 bg-indigo-50/50 shadow-inner"
+                            : "border-slate-200 hover:border-indigo-400 bg-slate-50 hover:bg-indigo-50/30"
                     )}
                 >
                     <input {...getInputProps()} />
-                    <div className="p-8 flex flex-col items-center text-center gap-4 relative z-10">
+                    <div className="flex flex-col items-center justify-center gap-4">
                         <div className={cn(
-                            "w-12 h-12 rounded-xl flex items-center justify-center transition-all bg-primary/10 group-hover:scale-110",
-                            isDragActive ? "text-primary scale-110" : "text-primary"
+                            "w-14 h-14 rounded-2xl flex items-center justify-center transition-all bg-indigo-100 text-indigo-600 border border-indigo-200 shadow-sm group-hover:scale-110",
+                            isDragActive && "scale-110 bg-indigo-600 text-white"
                         )}>
                             {uploading ? (
                                 <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24" fill="none">
@@ -69,8 +72,8 @@ export default function UploadModal({ open, onOpenChange, onSuccess }: UploadMod
                             )}
                         </div>
                         <div>
-                            <h2 className="text-lg font-bold">{isDragActive ? 'Drop to upload' : uploading ? 'Uploading...' : 'Upload File'}</h2>
-                            <p className="text-xs text-muted-foreground max-w-xs mx-auto">Click or drag PDF/TXT files here.</p>
+                            <h2 className="text-base font-extrabold text-slate-900 mb-1">{isDragActive ? 'Drop files here' : uploading ? 'Processing upload...' : 'Choose or Drag Files'}</h2>
+                            <p className="text-xs text-slate-500 font-medium">Supports PDF or TXT files up to 50MB</p>
                         </div>
                     </div>
                 </div>

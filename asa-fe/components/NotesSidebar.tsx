@@ -16,28 +16,28 @@ export function NotesSidebar({ docName, activeSection }: {
     ]
 
     return (
-        <div className="w-[140px] flex-shrink-0 flex flex-col bg-background/50 backdrop-blur-xl border-r border-white/5 h-full z-10">
+        <div className="w-[140px] flex-shrink-0 flex flex-col bg-white/90 backdrop-blur-xl border-r border-slate-200/80 h-full z-10">
             {/* Logo */}
             <button 
                 onClick={() => router.push('/dashboard')}
-                className="px-3 pt-6 pb-5 border-b border-white/5 flex flex-col items-center gap-3 w-full hover:bg-white/5 transition-colors cursor-pointer outline-none"
+                className="px-3 pt-6 pb-5 border-b border-slate-100 flex flex-col items-center gap-3 w-full hover:bg-slate-50 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
-                <div className="w-10 h-10 bg-gradient-to-br from-violet-600 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-500/20">
                     <BookOpen className="h-5 w-5 text-white" />
                 </div>
-                <span className="font-bold text-sm tracking-tight text-gradient text-center leading-tight">Study Buddy</span>
+                <span className="font-extrabold text-sm tracking-tight text-slate-900 text-center leading-tight">Study Buddy</span>
             </button>
             {/* Nav items */}
-            <nav className="flex-1 p-2 space-y-1">
+            <nav className="flex-1 p-2 space-y-1.5">
                 {navItems.map(({ id, label, icon: Icon, route }) => (
                     <button
                         key={id}
                         onClick={() => router.push(route)}
                         className={cn(
-                            'w-full flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-[10px] font-semibold transition-all',
+                            'w-full flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl text-xs font-bold transition-all focus-visible:ring-2 focus-visible:ring-indigo-500',
                             activeSection === id
-                                ? 'bg-primary/15 text-primary'
-                                : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                                ? 'bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm'
+                                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                         )}
                     >
                         <Icon className="h-4 w-4" />

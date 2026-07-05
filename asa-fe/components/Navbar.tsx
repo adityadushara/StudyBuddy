@@ -63,27 +63,34 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle?: () => void }) 
             </Link>
 
             <div className="ml-auto flex items-center gap-2">
+                {(showNotifs || showDropdown) && (
+                    <div 
+                        className="fixed inset-0 z-40 bg-transparent" 
+                        onClick={() => { setShowNotifs(false); setShowDropdown(false); }} 
+                    />
+                )}
 
-                <div className="relative">
+                <div className="relative z-50">
                     <button 
                         onClick={() => { setShowNotifs(v => !v); setShowDropdown(false); }}
-                        className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-accent transition-colors relative group"
+                        aria-label="Toggle notifications"
+                        className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 transition-colors relative group focus-visible:ring-2 focus-visible:ring-indigo-500"
                     >
-                        <Bell className="h-4 w-4" />
+                        <Bell className="h-5 w-5 text-slate-600" />
                         {unreadCount > 0 && (
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-violet-500 rounded-full animate-pulse border-2 border-background" />
+                            <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-indigo-600 rounded-full animate-pulse border-2 border-white" />
                         )}
                     </button>
 
                     {showNotifs && (
-                        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border bg-popover shadow-2xl py-0 z-50 animate-in fade-in slide-in-from-top-2 overflow-hidden">
-                            <div className="px-4 py-3 border-b flex items-center justify-between bg-muted/30">
-                                <h3 className="font-bold text-sm">Notifications</h3>
+                        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl border border-slate-200 bg-white shadow-2xl py-0 z-50 animate-in fade-in slide-in-from-top-2 overflow-hidden">
+                            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                                <h3 className="font-extrabold text-sm text-slate-900">Notifications</h3>
                                 <div className="flex items-center gap-3">
                                     {unreadCount > 0 && (
                                         <button 
                                             onClick={markAllAsRead}
-                                            className="text-[10px] text-primary hover:underline font-bold uppercase tracking-wider"
+                                            className="text-[10px] text-indigo-600 hover:underline font-extrabold uppercase tracking-wider"
                                         >
                                             Mark all read
                                         </button>
@@ -91,47 +98,47 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle?: () => void }) 
                                     {notifications.length > 0 && (
                                         <button 
                                             onClick={clearAll}
-                                            className="text-[10px] text-muted-foreground hover:text-destructive font-bold uppercase tracking-wider"
+                                            className="text-[10px] text-slate-400 hover:text-red-600 font-extrabold uppercase tracking-wider"
                                         >
                                             Clear all
                                         </button>
                                     )}
                                 </div>
                             </div>
-                            <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                            <div className="max-h-[400px] overflow-y-auto">
                                 {notifications.length === 0 ? (
                                     <div className="p-10 text-center flex flex-col items-center">
-                                        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4 opacity-40">
-                                            <Bell className="h-6 w-6 text-muted-foreground" />
+                                        <div className="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 text-slate-400">
+                                            <Bell className="h-6 w-6" />
                                         </div>
-                                        <p className="text-sm font-bold text-foreground/60">No new notifications</p>
-                                        <p className="text-xs text-muted-foreground mt-1">We'll alert you when something happens.</p>
+                                        <p className="text-sm font-bold text-slate-700">No new notifications</p>
+                                        <p className="text-xs text-slate-400 mt-1">We'll alert you when study actions occur.</p>
                                     </div>
                                 ) : (
-                                    <div className="divide-y divide-border">
+                                    <div className="divide-y divide-slate-100">
                                         {notifications.map(n => (
                                             <div 
                                                 key={n.id} 
                                                 onClick={() => markAsRead(n.id)}
                                                 className={cn(
-                                                    "p-4 flex gap-3 hover:bg-muted/50 transition-all cursor-pointer group/notif relative",
-                                                    !n.read && "bg-primary/[0.03]"
+                                                    "p-4 flex gap-3 hover:bg-slate-50 transition-all cursor-pointer group/notif relative",
+                                                    !n.read && "bg-indigo-50/30"
                                                 )}
                                             >
-                                                {!n.read && <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-full" />}
+                                                {!n.read && <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-600 rounded-full" />}
                                                 <div className="mt-0.5 flex-shrink-0">
                                                     {getIcon(n.type)}
                                                 </div>
                                                 <div className="flex-1 min-w-0 pr-4">
-                                                    <p className={cn("text-xs font-bold text-foreground mb-0.5", !n.read && "text-primary")}>{n.title}</p>
-                                                    <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{n.message}</p>
-                                                    <p className="text-[9px] text-muted-foreground mt-2 font-medium uppercase tracking-wider">{formatTime(n.time)}</p>
+                                                    <p className={cn("text-xs font-bold text-slate-900 mb-0.5", !n.read && "text-indigo-600")}>{n.title}</p>
+                                                    <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-2">{n.message}</p>
+                                                    <p className="text-[9px] text-slate-400 mt-2 font-bold uppercase tracking-wider">{formatTime(n.time)}</p>
                                                 </div>
                                                 <button 
                                                     onClick={(e) => { e.stopPropagation(); deleteNotification(n.id) }}
-                                                    className="opacity-0 group-hover/notif:opacity-100 p-1.5 hover:bg-destructive/10 hover:text-destructive rounded-md transition-all h-fit"
+                                                    className="opacity-0 group-hover/notif:opacity-100 p-1.5 hover:bg-red-50 hover:text-red-600 rounded-lg transition-all h-fit"
                                                 >
-                                                    <XCircle className="h-3.5 w-3.5" />
+                                                    <XCircle className="h-4 w-4" />
                                                 </button>
                                             </div>
                                         ))}
@@ -142,30 +149,31 @@ export default function Navbar({ onMenuToggle }: { onMenuToggle?: () => void }) 
                     )}
                 </div>
 
-                <div className="relative">
+                <div className="relative z-50">
                     <button
                         onClick={() => { setShowDropdown(d => !d); setShowNotifs(false); }}
-                        className="flex items-center gap-2 rounded-lg p-1.5 hover:bg-accent transition-colors"
+                        aria-label="User menu"
+                        className="flex items-center gap-2.5 rounded-xl p-1.5 hover:bg-slate-100 transition-colors focus-visible:ring-2 focus-visible:ring-indigo-500"
                     >
-                        <Avatar className="h-8 w-8">
+                        <Avatar className="h-9 w-9 border-2 border-indigo-100 shadow-sm">
                             {user?.avatar && <AvatarImage src={authApi.getAvatarUrl(user.avatar)} alt={user.name} />}
-                            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                            <AvatarFallback className="text-xs font-black bg-gradient-to-br from-indigo-600 to-blue-600 text-white">{initials}</AvatarFallback>
                         </Avatar>
-                        <span className="hidden sm:block text-sm font-medium max-w-[120px] truncate">{user?.name || 'User'}</span>
+                        <span className="hidden sm:block text-sm font-bold text-slate-800 max-w-[120px] truncate">{user?.name || 'User'}</span>
                     </button>
 
                     {showDropdown && (
-                        <div className="absolute right-0 top-full mt-2 w-48 rounded-xl border bg-popover shadow-lg py-1 z-50">
-                            <div className="px-3 py-2 border-b">
-                                <p className="text-sm font-medium truncate">{user?.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                        <div className="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-slate-200 bg-white shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2">
+                            <div className="px-4 py-3 border-b border-slate-100">
+                                <p className="text-sm font-extrabold text-slate-900 truncate">{user?.name}</p>
+                                <p className="text-xs text-slate-500 truncate mt-0.5">{user?.email}</p>
                             </div>
                             <Link href="/dashboard/profile" onClick={() => setShowDropdown(false)}
-                                className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors">
+                                className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-colors">
                                 Profile Settings
                             </Link>
                             <button onClick={handleLogout}
-                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors">
+                                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors">
                                 Sign Out
                             </button>
                         </div>
